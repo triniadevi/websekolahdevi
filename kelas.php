@@ -1,9 +1,23 @@
-<?php 
+<?php
 include 'koneksi.php';
 
-// Ambil data kelas
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$query = "SELECT * FROM kelas WHERE nama_kelas LIKE '%$search%'";
+// Pencarian
+$search = isset($_GET['search']) ? mysqli_real_escape_string($koneksi, $_GET['search']) : '';
+$search_query = ($search != '') ? "WHERE nama_kelas LIKE '%$search%'" : '';
+
+// Pagination
+$limit = 5; // Jumlah data per halaman
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $limit;
+
+// Hitung total data
+$total_query = "SELECT COUNT(*) AS total FROM kelas $search_query";
+$total_result = mysqli_query($koneksi, $total_query);
+$total_row = mysqli_fetch_assoc($total_result);
+$total_pages = ceil($total_row['total'] / $limit);
+
+// Ambil data kelas dengan pagination
+$query = "SELECT * FROM kelas $search_query LIMIT $limit OFFSET $offset";
 $result = mysqli_query($koneksi, $query);
 ?>
 
@@ -18,6 +32,7 @@ $result = mysqli_query($koneksi, $query);
 <body>
     <div class="container mt-4">
         <h2 class="mb-3">Data Kelas</h2>
+
         <div class="d-flex justify-content-between mb-3">
             <a href="index.php" class="btn btn-primary">Kembali ke Data Siswa</a>
             <form method="GET" class="d-flex">
@@ -38,8 +53,8 @@ $result = mysqli_query($koneksi, $query);
             <tbody>
                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($row['id_kelas']); ?></td>
-                        <td><?php echo htmlspecialchars($row['nama_kelas']); ?></td>
+                        <td><?php echo $row['id_kelas']; ?></td>
+                        <td><?php echo $row['nama_kelas']; ?></td>
                         <td>
                             <a href="edit_kelas.php?id=<?php echo $row['id_kelas']; ?>" class="btn btn-warning btn-sm">Edit</a>
                             <a href="hapus_kelas.php?id=<?php echo $row['id_kelas']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus?');">Hapus</a>
@@ -48,21 +63,17 @@ $result = mysqli_query($koneksi, $query);
                 <?php endwhile; ?>
             </tbody>
         </table>
-
+        <!-- Pagination -->
         <nav>
             <ul class="pagination">
-                <?php 
-                    // Assuming you have pagination logic
-                    for ($i = 1; $i <= $total_pages; $i++): 
-                ?>
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                     <li class="page-item <?php if ($page == $i) echo 'active'; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo htmlspecialchars($search); ?>"><?php echo $i; ?></a>
+                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
                     </li>
                 <?php endfor; ?>
             </ul>
         </nav>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

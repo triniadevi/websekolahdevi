@@ -1,9 +1,10 @@
 <?php
-$host = "localhost"; // Sesuaikan dengan server database Anda
-$user = "root"; // Sesuaikan dengan username database Anda
-$pass = ""; // Sesuaikan dengan password database Anda
-$db = "sekolah"; // Ganti dengan nama database Anda
+$host = "localhost";
+$user = "root";
+$pass = "";
+$db   = "sekolah";
 
+// Membuat koneksi ke database
 $koneksi = mysqli_connect($host, $user, $pass, $db);
 
 // Cek koneksi
